@@ -1,5 +1,5 @@
 import feq_of_letters
-from langdetect import detect_langs
+import is_english_word
 # make a vigenere cipher of the lowercase english alphabet only
 # key is the key
 # text is the text to be encrypted
@@ -45,10 +45,9 @@ def vigenere_cipher_brute_force(text):
         word = word.lower()
         decrypted_wins = ''
         decrypted = decrypt_vigenere_cipher(word, text)
-        lang = detect_langs(decrypted)
-        if lang[0].lang == 'en' and lang[0].prob > 0.98:
-            decrypted_wins = decrypted
-            print('Key: ' + word + ' ' + decrypted)
+        if is_english_word.is_logically_english(decrypted, 0.60):
+            decrypted_wins += decrypted
+            print('Key: ' + word + ' Text: ' + decrypted_wins)
     return decrypted_wins
 
 
