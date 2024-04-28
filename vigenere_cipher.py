@@ -1,79 +1,103 @@
+import feq_of_letters
+from langdetect import detect_langs
 # make a vigenere cipher of the lowercase english alphabet only
-# L is the length of the key
 # key is the key
 # text is the text to be encrypted
 
-def vigenere_cipher(L, key, text):
-    alphabet = 'abcdefghijklmnopqrstuvwxyz'
-    key = key.lower()
-    text = text.lower()
-    encrypted_text = ''
-    for i in range(len(text)):
-        if text[i] in alphabet:
-            encrypted_text += alphabet[(alphabet.index(text[i]) +
-                                        alphabet.index(key[i % L])) % 26]
-        else:
-            encrypted_text += text[i]
-    return encrypted_text
+ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
 
 
-def decrypt_vigenere_cipher(L, key, text):
-    alphabet = 'abcdefghijklmnopqrstuvwxyz'
-    key = key.lower()
-    text = text.lower()
-    decrypted_text = ''
+def vigenere_cipher(key, text):
+    cipher_text = ''
     for i in range(len(text)):
-        if text[i] in alphabet:
-            decrypted_text += alphabet[(alphabet.index(text[i]) -
-                                        alphabet.index(key[i % L])) % 26]
+        if text[i] in ALPHABET:
+            p = ALPHABET.index(text[i])
+            k = ALPHABET.index(key[i % len(key)])
+            c = (p + k) % 26
+            cipher_text += ALPHABET[c]
         else:
-            decrypted_text += text[i]
-    return decrypted_text
+            # if the character is not in the alphabet, add it to the cipher text mostly for spaces
+            cipher_text += text[i]
+    return cipher_text
+
+
+def decrypt_vigenere_cipher(key, text):
+    plain_text = ''
+    for i in range(len(text)):
+        if text[i] in ALPHABET:
+            c = ALPHABET.index(text[i])
+            k = ALPHABET.index(key[i % len(key)])
+            p = (c - k) % 26
+            plain_text += ALPHABET[p]
+        else:
+            # if the character is not in the alphabet, add it to the plain text mostly for spaces
+            plain_text += text[i]
+    return plain_text
+
+
+def vigenere_cipher_brute_force(text):
+    filereader = open('dictionary.txt', 'r')
+    dictionary = filereader.readlines()
+    filereader.close()
+
+    for word in dictionary:
+        word = word.strip()
+        word = word.lower()
+        decrypted_wins = ''
+        decrypted = decrypt_vigenere_cipher(word, text)
+        lang = detect_langs(decrypted)
+        if lang[0].lang == 'en' and lang[0].prob > 0.98:
+            decrypted_wins = decrypted
+            print('Key: ' + word + ' ' + decrypted)
+    return decrypted_wins
 
 
 def vigenere_cipher_frequency_attack(L, text):
     return 0
 
+
 def index_of_coincidence(text):
-    frequency = [0]*26 # frequency of each letter in the alphabet
+    frequency = [0]*26  # frequency of each letter in the alphabet
     alphabet = 'abcdefghijklmnopqrstuvwxyz'
     total = 0
     for char in text:
         if char in alphabet:
-            frequency[alphabet.index(char)] += 1 # increment the frequency of the letter
+            # increment the frequency of the letter
+            frequency[alphabet.index(char)] += 1
             total += 1
-    ic = 0 
+    ic = 0
     numerator = 0
     for i in range(26):
         numerator += frequency[i] * (frequency[i] - 1)  # Sum the numerators
     if total > 1:  # Avoid division by zero
         ic = 26 * numerator / (total * (total - 1))
-    return ic 
+    return ic
 
-def index_of_coincidence_period(text):  
+
+def index_of_coincidence_period(text):
     found = False
     period = 0
     while not found:
         period += 1
-        slices = [''] * period 
+        slices = [''] * period
         for i in range(len(text)):
-            slices[i % period] += text[i] # Split the text into slices
+            slices[i % period] += text[i]  # Split the text into slices
         sum = 0
         for i in range(period):
-            sum += index_of_coincidence(slices[i]) # Sum the index of coincidences of each slice
-        index_of_coincidence_average = sum / period 
-        if index_of_coincidence_average > 1.6: # If the average index of coincidence is greater than 1.6, the period is found
+            # Sum the index of coincidences of each slice
+            sum += index_of_coincidence(slices[i])
+        index_of_coincidence_average = sum / period
+        # If the average index of coincidence is greater than 1.6, the period is found
+        if index_of_coincidence_average > 1.6:
             found = True
             return period
 
-# Testing the function
-L = 3
+
+monogram = feq_of_letters.get_frequency()
+text = 'hello world i am a crazy man that likes dogs and ice cream i also hate opening up about tax fraud'
 key = 'key'
-#changed the text to be longer since the index of coincidence is more accurate with a larger text than a short one
-text = 'hello world i am westin pellicer and i am a student at the university of embry riddle i like fortnite and travvy patty mealz'
-cipherText = vigenere_cipher(L, key, text)
-iocPeriod = index_of_coincidence_period(cipherText)
-print(cipherText)  # prints 'rijvs gspvh'
-print(decrypt_vigenere_cipher(L, key, cipherText))  # prints 'hello world' decrypted from cipherText
-print(index_of_coincidence(cipherText)) # p
-print(index_of_coincidence_period(cipherText)) #Should return 3
+print(vigenere_cipher(key, text))
+print(decrypt_vigenere_cipher(key, vigenere_cipher(key, text)))
+print(index_of_coincidence(text))
+print(index_of_coincidence_period(text))
+print(vigenere_cipher_brute_force(vigenere_cipher(key, text)))
