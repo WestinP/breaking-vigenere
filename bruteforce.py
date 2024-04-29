@@ -36,11 +36,13 @@ def ioc_bruteforce(cipher_text: str, fitness_threshold=0.007):
 
     key_length = ioc_period(cipher_text)
 
-    if key_length == None:
+    if key_length is None or key_length <= 0:
         print("No IOC found")
         return ('', '')
 
     # if key length is too long, warn about potentially long runtime
+    # Test (uncomment to test key length )
+    #print(f"IOC key length at {key_length}")
     if key_length > 6:
         print(f"Warning: IOC key length at {key_length}")
 
