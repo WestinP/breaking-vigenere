@@ -75,5 +75,5 @@ cipherText = vigenere_cipher(L, key, text)
 iocPeriod = index_of_coincidence_period(cipherText)
 print(cipherText)  # prints 'rijvs gspvh'
 print(decrypt_vigenere_cipher(L, key, cipherText))  # prints 'hello world' decrypted from cipherText
-print(index_of_coincidence(cipherText)) # p
+print(index_of_coincidence(cipherText)) # should return a number greater than 1.6
 print(index_of_coincidence_period(cipherText)) #Should return 3
